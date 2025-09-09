@@ -1,14 +1,16 @@
-import gradio as gr
-from langchain_orchestrator import orchestrate
 
-chat_history = []
+import gradio as gr
+from nlu.intent_classifier import IntentOrchestrator
+
+orchestrator = IntentOrchestrator()
+
 
 def chatbot_fn(user_input, history):
     history = history or []
     def add_message(role, content):
         history.append({"role": role, "content": content})
     add_message("user", user_input)
-    response = orchestrate(user_input)
+    response = orchestrator.route(user_input)
     add_message("assistant", response)
     return history
 

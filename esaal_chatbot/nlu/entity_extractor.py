@@ -27,12 +27,25 @@ class EntityExtractor:
             if m:
                 entities['time'] = m.group(0)
                 break
-        # Service extraction (simple keyword match)
-        services = ['consultation', 'checkup', 'follow-up', 'vaccination', 'test', 'therapy', 'diagnosis']
+        # Service extraction (improved: fuzzy match and noun phrase extraction)
+        services = ['consultation', 'checkup', 'follow-up', 'vaccination', 'test', 'therapy', 'diagnosis', 'appointment', 'meeting', 'visit', 'session', 'treatment', 'procedure', 'exam', 'screening', 'injection', 'immunization', 'assessment', 'review', 'referral', 'counseling', 'advice', 'support']
+        user_lower = user_input.lower()
+        found_service = None
         for s in services:
-            if s in user_input.lower():
-                entities['service'] = s
+            if s in user_lower:
+                found_service = s
                 break
+        if not found_service:
+            # Try to extract noun phrases as fallback (very basic)
+            m = re.search(r'for a ([a-z ]+)', user_lower)
+            if m:
+                found_service = m.group(1).strip()
+        if not found_service:
+            m = re.search(r'for ([a-z ]+)', user_lower)
+            if m:
+                found_service = m.group(1).strip()
+        if found_service:
+            entities['service'] = found_service
         # Name extraction (e.g., 'my name is ...')
         m = re.search(r'my name is ([A-Za-z ]+)', user_input, re.IGNORECASE)
         if m:
